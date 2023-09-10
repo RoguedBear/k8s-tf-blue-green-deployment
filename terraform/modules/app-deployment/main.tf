@@ -36,3 +36,46 @@ resource "kubernetes_deployment" "deployment" {
     }
   }
 }
+
+resource "kubernetes_service" "service" {
+  metadata {
+    name      = format("%s-svc", var.name)
+    namespace = var.namespace
+  }
+  spec {
+    selector = {
+      app = var.name
+    }
+    port {
+      port        = var.port
+      target_port = var.port
+    }
+    type = "ClusterIP"
+  }
+}
+
+resource "kubernetes_ingress" "ingress" {
+  metadata {
+    name      = format("%s-ingress", var.name)
+    namespace = var.namespace
+    labels = {
+      name = format("%s-ingress", var.name)
+    }
+    annotations = {
+      "nginx.ingress.kubernetes.io/canary"        = "true"
+      "nginx.ingress.kubernetes.io/canary-weight" = format("%d", var.traffic_weight)
+    }
+  }
+  spec {
+    rule {
+      http {
+        path {
+          backend {
+            service_name = kubernetes_service.service.metadata.0.name
+            service_port = var.port
+          }
+        }
+      }
+    }
+  }
+}
