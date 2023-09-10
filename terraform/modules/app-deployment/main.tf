@@ -21,7 +21,14 @@ resource "kubernetes_deployment" "deployment" {
         container {
           name  = var.name
           image = var.image
-          args  = [var.args]
+          args = [
+            for match in regexall("(-[A-Za-z_]+=(?:\\\".+\\\"|[^ ]+))", var.args) :
+            match[0]
+          ]
+          # Yes. This is a hardcoded regex specifically to extract listen and text
+          # together   
+          # https://regex101.com/r/pOqCN1/2
+
           resources {
             limits = {
               memory = "50M"
