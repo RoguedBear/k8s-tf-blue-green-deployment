@@ -16,3 +16,25 @@ spec:
                 name: blue-app-svc
                 port:
                   number: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: green-ingress
+  labels:
+    name: green-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-weight: "25"
+spec:
+  rules:
+    - host: # intentionally keep this empty, because working with minikube only
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: green-app-svc
+                port:
+                  number: 8081
