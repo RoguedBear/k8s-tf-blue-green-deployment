@@ -61,7 +61,7 @@ resource "kubernetes_service" "service" {
   }
 }
 
-resource "kubernetes_ingress" "ingress" {
+resource "kubernetes_ingress_v1" "ingress" {
   metadata {
     name      = format("%s-ingress", var.name)
     namespace = var.namespace
@@ -77,9 +77,14 @@ resource "kubernetes_ingress" "ingress" {
     rule {
       http {
         path {
+          path = "/"
           backend {
-            service_name = kubernetes_service.service.metadata.0.name
-            service_port = var.port
+            service {
+              name = kubernetes_service.service.metadata.0.name
+              port {
+                number = var.port
+              }
+            }
           }
         }
       }
